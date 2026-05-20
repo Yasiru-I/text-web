@@ -121,11 +121,12 @@ function updateCanvas() {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
-    // පළමු පේළිය ("Experience the Magic of")
-    const fontSize1 = Math.round(50 * window.devicePixelRatio); 
-    ctx.font = `400 ${fontSize1}px Cormorant, serif`; 
-    ctx.fillText("Experience the Magic of", w / 2, h / 2 - (40 * window.devicePixelRatio)); 
-
+    
+    // // පළමු පේළිය ("Experience the Magic of")
+    // const fontSize1 = Math.round(50 * window.devicePixelRatio); 
+    // ctx.font = `400 ${fontSize1}px Cormorant, serif`; 
+    // ctx.fillText("Experience the Magic of", w / 2, h / 2 - (40 * window.devicePixelRatio)); 
+   
    
 
     textTexture.needsUpdate = true;

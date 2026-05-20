@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Sticker Burst Montage</title>
+
+  <link rel="stylesheet" href="test.css" />
+</head>
+<body>
+
+  <!-- ========================================= -->
+  <!-- STICKER MONTAGE CONTAINER -->
+  <!-- ========================================= -->
+
+  <div class="sticker-montage" id="stickerMontage"></div>
+
+  <!-- ========================================= -->
+  <!-- YOUR WEBSITE CONTENT -->
+  <!-- ========================================= -->
+
+  <main class="hero">
+    <h1>Sticker Burst Intro</h1>
+    <p>Rapid Sequential Pop Animation</p>
+  </main>
+
+  <!-- ========================================= -->
+  <!-- MODULE -->
+  <!-- ========================================= -->
+
+  <script type="module">
+
+    import StickerMontage from './sticker-montage.js';
+
+    /*
+      HOW THIS WORKS:
+
+      1. Put your sticker images inside:
+
+         /stickers
+
+      2. Example filenames:
+
+         sticker-01.png
+         sticker-02.png
+         smile.webp
+         logo.png
+         anything.jpg
+
+      3. Add/remove files freely.
+         No JS edits needed.
+
+      4. The montage auto-detects them.
+    */
+
+    const montage = new StickerMontage({
+      container: '#stickerMontage',
+
+      /*
+        IMPORTANT:
+
+        Because browsers CANNOT read folder contents directly,
+        we use a generated manifest.
+
+        Create:
+        /stickers/stickers.json
+
+        Example:
+        [
+          "sticker-01.png",
+          "sticker-02.png",
+          "smile.webp"
+        ]
+      */
+
+      manifest: './stickers/stickers.json',
+
+      /*
+        TIMING
+      */
+
+      duration: 140,
+      interval: 70,
+
+      /*
+        RANDOM POSITIONING
+      */
+
+      randomPosition: true,
+
+      /*
+        CENTER CLUSTER RANGE
+      */
+
+      spread: 280,
+
+      /*
+        SCALE
+      */
+
+      startScale: 0,
+      overshootScale: 1.15,
+      endScale: 1,
+
+      /*
+        LOOP
+      */
+
+      loop: true,
+
+      /*
+        OPTIONAL:
+        autoplay immediately
+      */
+
+      autoplay: true
+    });
+
+  </script>
+
+</body>
+</html>

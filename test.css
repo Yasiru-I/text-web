@@ -1,0 +1,132 @@
+/* ========================================= */
+/* RESET */
+/* ========================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  overflow: hidden;
+  background: #0f0f0f;
+  font-family: Arial, sans-serif;
+  color: white;
+}
+
+/* ========================================= */
+/* DEMO CONTENT */
+/* ========================================= */
+
+.hero {
+  position: relative;
+  z-index: 1;
+
+  width: 100vw;
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 5rem;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+}
+
+.hero p {
+  margin-top: 1rem;
+  opacity: 0.7;
+  font-size: 1.2rem;
+}
+
+/* ========================================= */
+/* MONTAGE LAYER */
+/* ========================================= */
+
+.sticker-montage {
+  position: fixed;
+  inset: 0;
+
+  overflow: hidden;
+  pointer-events: none;
+
+  z-index: 9999;
+}
+
+/* ========================================= */
+/* STICKER */
+/* ========================================= */
+
+.sticker {
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+
+  width: 180px;
+  height: 180px;
+
+  object-fit: contain;
+
+  will-change: transform, opacity;
+
+  opacity: 0;
+
+  transform:
+    translate(-50%, -50%)
+    scale(0);
+
+  backface-visibility: hidden;
+
+  user-select: none;
+}
+
+/* ========================================= */
+/* BURST ANIMATION */
+/* ========================================= */
+
+@keyframes stickerBurst {
+
+  0% {
+    opacity: 0;
+
+    transform:
+      translate(-50%, -50%)
+      scale(0)
+      rotate(-8deg);
+  }
+
+  40% {
+    opacity: 1;
+
+    transform:
+      translate(-50%, -50%)
+      scale(1.15)
+      rotate(3deg);
+  }
+
+  65% {
+    opacity: 1;
+
+    transform:
+      translate(-50%, -50%)
+      scale(1)
+      rotate(0deg);
+  }
+
+  100% {
+    opacity: 0;
+
+    transform:
+      translate(-50%, -50%)
+      scale(0)
+      rotate(2deg);
+  }
+}
