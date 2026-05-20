@@ -71,9 +71,6 @@ document.addEventListener("DOMContentLoaded", () => {
   simScene.add(simQuad);
   scene.add(renderQuad);
 
-  // ==============================================================
-  // අලුත් කොටස: Canvas එකක් හදලා ඒකට Image එකයි අකුරුයි දෙකම අඳිනවා
-  // ==============================================================
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d", { alpha: true });
   const textTexture = new THREE.CanvasTexture(canvas);
@@ -82,18 +79,18 @@ document.addEventListener("DOMContentLoaded", () => {
   textTexture.format = THREE.RGBAFormat;
 
   const bgImage = new Image();
-  bgImage.src = 'images/sea-background.png'; // ඔයාගේ මුහුදේ පින්තූරය මෙතන දෙන්න
-  // ෆොන්ට් එක ලෝඩ් වෙලා ඉවර වුණාම විතරක් කැන්වස් එක අප්ඩේට් කරන්න කියනවා
+  bgImage.src = 'images/sea-background.png'; 
+  
   document.fonts.ready.then(() => {
       updateCanvas();
   });
-function updateCanvas() {
+
+  function updateCanvas() {
     const w = window.innerWidth * window.devicePixelRatio;
     const h = window.innerHeight * window.devicePixelRatio;
     canvas.width = w;
     canvas.height = h;
 
-    // 1. පින්තූරය අඳින්න
     if (bgImage.complete && bgImage.naturalWidth > 0) {
       const imgRatio = bgImage.naturalWidth / bgImage.naturalHeight;
       const canvasRatio = w / h;
@@ -112,27 +109,70 @@ function updateCanvas() {
       ctx.fillRect(0, 0, w, h);
     }
 
-    // 2. අකුරු පැහැදිලිව පේන්න අඳුරු Overlay එකක්
     ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
     ctx.fillRect(0, 0, w, h);
 
-    // 3. ඔයාගේ අකුරු පේළි දෙක ලියනවා
     ctx.fillStyle = "#ffffff"; 
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-
-    
-    // // පළමු පේළිය ("Experience the Magic of")
-    // const fontSize1 = Math.round(50 * window.devicePixelRatio); 
-    // ctx.font = `400 ${fontSize1}px Cormorant, serif`; 
-    // ctx.fillText("Experience the Magic of", w / 2, h / 2 - (40 * window.devicePixelRatio)); 
-   
-   
 
     textTexture.needsUpdate = true;
   }
 
   bgImage.onload = updateCanvas;
+
+  // ==========================================
+  // AUTO RANDOM WATER DROPS LOGIC
+  // ==========================================
+  let isUserInteracting = false;
+  let idleTimeout;
+
+  const simulateRandomDrop = () => {
+      // User මවුස් එක හෙලවනවා නම් auto drops එන්නේ නෑ
+      if (isUserInteracting) return;
+
+      const rx = Math.random() * window.innerWidth;
+      const ry = Math.random() * window.innerHeight;
+
+      mouse.x = rx * window.devicePixelRatio;
+      mouse.y = ry * window.devicePixelRatio;
+
+      setTimeout(() => {
+          if (!isUserInteracting) {
+              mouse.set(0, 0);
+          }
+      }, 50);
+  };
+
+  // සෑම මිලි තත්පර 600කට වරක්ම බිංදුවක් වැටෙනවා 
+  setInterval(simulateRandomDrop, 600);
+
+  const handleUserInteraction = (e) => {
+      isUserInteracting = true; // Auto drops නවත්තලා, මවුස් එකට effect එක දෙනවා
+      
+      let clientX = e.clientX;
+      let clientY = e.clientY;
+
+      // Touch screen එකක් නම් ඒකෙ ඛණ්ඩාංක ගන්නවා
+      if (e.touches && e.touches.length > 0) {
+          clientX = e.touches[0].clientX;
+          clientY = e.touches[0].clientY;
+      }
+
+      if (clientX !== undefined && clientY !== undefined) {
+          mouse.x = clientX * window.devicePixelRatio;
+          mouse.y = (window.innerHeight - clientY) * window.devicePixelRatio;
+      }
+
+      clearTimeout(idleTimeout); // පරණ timer එක clear කරනවා
+
+      // තත්පර 1ක් (1000ms) මවුස් එක නොහොල්වා හිටියොත් ආයෙත් auto drops පටන් ගන්නවා
+      idleTimeout = setTimeout(() => {
+          isUserInteracting = false;
+          mouse.set(0, 0);
+      }, 1000); 
+  };
+  // ==========================================
 
   window.addEventListener("resize", () => {
     const newWidth = window.innerWidth * window.devicePixelRatio;
@@ -143,16 +183,17 @@ function updateCanvas() {
     rtB.setSize(newWidth, newHeight);
     simMaterial.uniforms.resolution.value.set(newWidth, newHeight);
     
-    updateCanvas(); // Resize වෙද්දි අකුරු ටික ආයේ අඳිනවා
+    updateCanvas(); 
   });
 
-  window.addEventListener("mousemove", (e) => {
-    mouse.x = e.clientX * window.devicePixelRatio;
-    mouse.y = (window.innerHeight - e.clientY) * window.devicePixelRatio;
-  });
+  // Event Listeners
+  window.addEventListener("mousemove", handleUserInteraction);
+  window.addEventListener("touchstart", handleUserInteraction, {passive: true});
+  window.addEventListener("touchmove", handleUserInteraction, {passive: true});
 
   window.addEventListener("mouseleave", () => {
     mouse.set(0, 0);
+    isUserInteracting = false; // බ්‍රවුසර් එකෙන් එළියට ගිය ගමන් auto drops පටන් ගන්නවා
   });
 
   const animate = () => {
@@ -164,7 +205,7 @@ function updateCanvas() {
     renderer.render(simScene, camera);
 
     renderMaterial.uniforms.textureA.value = rtB.texture;
-    renderMaterial.uniforms.textureB.value = textTexture; // අලුත් texture එක දානවා
+    renderMaterial.uniforms.textureB.value = textTexture; 
     renderer.setRenderTarget(null);
     renderer.render(scene, camera);
 

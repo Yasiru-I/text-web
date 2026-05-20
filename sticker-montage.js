@@ -1,330 +1,149 @@
-/*
-========================================================
-
-STICKER BURST MONTAGE SYSTEM
-Production-ready reusable module
-Vanilla JavaScript
-Zero dependencies
-
-========================================================
-*/
-
 export default class StickerMontage {
 
   constructor(options = {}) {
 
-    /*
-    ========================================================
-    CONFIG
-    ========================================================
-    */
-
     this.container = document.querySelector(options.container);
 
-    this.manifest = options.manifest || './stickers/stickers.json';
-
-    this.duration = options.duration || 140;
-    this.interval = options.interval || 70;
-
-    this.randomPosition = options.randomPosition ?? true;
-
-    this.spread = options.spread || 250;
-
-    this.startScale = options.startScale || 0;
-    this.overshootScale = options.overshootScale || 1.15;
-    this.endScale = options.endScale || 1;
-
-    this.loop = options.loop ?? true;
-
-    this.autoplay = options.autoplay ?? true;
-
     /*
-    ========================================================
-    INTERNALS
-    ========================================================
+    ========================================
+    SIMPLE ARRAY OF IMAGES
+    ========================================
     */
 
-    this.stickers = [];
-    this.currentIndex = 0;
-    this.isRunning = false;
-    this.timer = null;
+    this.images = [
+      './stickers/sticker-01.jpg',
+      './stickers/sticker-02.jpg',
+      './stickers/sticker-03.jpg',
+    ];
 
-    /*
-    ========================================================
-    INIT
-    ========================================================
-    */
+    this.duration = options.duration || 500;
+    this.interval = options.interval || 180;
 
-    this.init();
+    this.current = 0;
+
+    this.start();
   }
-
-  /*
-  ==========================================================
-  INIT
-  ==========================================================
-  */
-
-  async init() {
-
-    if (!this.container) {
-      console.error('StickerMontage: container not found.');
-      return;
-    }
-
-    try {
-
-      await this.loadManifest();
-
-      await this.preloadImages();
-
-      if (this.autoplay) {
-        this.start();
-      }
-
-    } catch (error) {
-
-      console.error(
-        'StickerMontage initialization failed:',
-        error
-      );
-
-    }
-  }
-
-  /*
-  ==========================================================
-  LOAD IMAGE MANIFEST
-  ==========================================================
-  */
-
-  async loadManifest() {
-
-    const response = await fetch(this.manifest);
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to load manifest: ${this.manifest}`
-      );
-    }
-
-    const files = await response.json();
-
-    /*
-      Normalize into objects
-    */
-
-    this.stickers = files.map(file => ({
-      src: `./stickers/${file}`
-    }));
-
-    if (!this.stickers.length) {
-      throw new Error('No sticker images found.');
-    }
-  }
-
-  /*
-  ==========================================================
-  PRELOAD IMAGES
-  ==========================================================
-  */
-
-  preloadImages() {
-
-    const promises = this.stickers.map(sticker => {
-
-      return new Promise((resolve, reject) => {
-
-        const img = new Image();
-
-        img.src = sticker.src;
-
-        img.onload = () => {
-          sticker.image = img;
-          resolve();
-        };
-
-        img.onerror = reject;
-      });
-
-    });
-
-    return Promise.all(promises);
-  }
-
-  /*
-  ==========================================================
-  START
-  ==========================================================
-  */
 
   start() {
 
-    if (this.isRunning) return;
+    setInterval(() => {
 
-    this.isRunning = true;
-
-    this.loopSequence();
-  }
-
-  /*
-  ==========================================================
-  STOP
-  ==========================================================
-  */
-
-  stop() {
-
-    this.isRunning = false;
-
-    clearTimeout(this.timer);
-  }
-
-  /*
-  ==========================================================
-  MAIN LOOP
-  ==========================================================
-  */
-
-  loopSequence() {
-
-    if (!this.isRunning) return;
-
-    this.showSticker();
-
-    this.timer = setTimeout(() => {
-
-      this.currentIndex++;
-
-      /*
-        LOOP
-      */
-
-      if (this.currentIndex >= this.stickers.length) {
-
-        if (this.loop) {
-
-          this.shuffle(this.stickers);
-
-          this.currentIndex = 0;
-
-        } else {
-
-          this.stop();
-          return;
-        }
-      }
-
-      this.loopSequence();
+      this.showSticker();
 
     }, this.interval);
   }
 
+ showSticker() {
+
+  const img = document.createElement('img');
+
+  img.src = this.images[this.current];
+
+  img.classList.add('sticker');
+
   /*
-  ==========================================================
-  SHOW STICKER
-  ==========================================================
+  ========================================
+  CENTER POSITION
+  ========================================
   */
 
-  showSticker() {
+  img.style.left = `50%`;
+  img.style.top = `50%`;
 
-    const stickerData = this.stickers[this.currentIndex];
+  /*
+  ========================================
+  SIZE
+  ========================================
+  */
 
-    if (!stickerData) return;
+  const size = 260;
 
-    const img = stickerData.image.cloneNode();
+  img.style.width = `${size}px`;
 
-    img.classList.add('sticker');
+  /*
+  ========================================
+  NO ROTATION
+  ========================================
+  */
 
-    /*
-    ========================================================
-    RANDOM POSITION
-    ========================================================
-    */
+  img.style.transform = `
+    translate(-50%, -50%)
+    scale(0)
+  `;
 
-    let x = window.innerWidth / 2;
-    let y = window.innerHeight / 2;
+  /*
+  ========================================
+  APPEND
+  ========================================
+  */
 
-    if (this.randomPosition) {
+  this.container.appendChild(img);
 
-      x += this.random(-this.spread, this.spread);
-      y += this.random(-this.spread, this.spread);
-    }
+  /*
+  ========================================
+  FORCE REPAINT
+  ========================================
+  */
 
-    img.style.left = `${x}px`;
-    img.style.top = `${y}px`;
+  img.offsetWidth;
 
-    /*
-    ========================================================
-    RANDOM SIZE
-    ========================================================
-    */
+  /*
+  ========================================
+  ANIMATE IN
+  ========================================
+  */
 
-    const size = this.random(120, 240);
+  img.style.transition = `
+    transform 0.14s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.14s ease
+  `;
 
-    img.style.width = `${size}px`;
-    img.style.height = `${size}px`;
+  img.style.opacity = 1;
 
-    /*
-    ========================================================
-    RANDOM ROTATION VARIABLE
-    ========================================================
-    */
+  img.style.transform = `
+    translate(-50%, -50%)
+    scale(1.12)
+  `;
 
-    const rotation = this.random(-14, 14);
+  /*
+  ========================================
+  POP OUT
+  ========================================
+  */
 
-    img.style.setProperty('--rotation', `${rotation}deg`);
+  setTimeout(() => {
 
-    /*
-    ========================================================
-    APPLY ANIMATION
-    ========================================================
-    */
+    img.style.opacity = 0;
 
-    img.style.animation = `
-      stickerBurst
-      ${this.duration}ms
-      cubic-bezier(0.22, 1, 0.36, 1)
-      forwards
+    img.style.transform = `
+      translate(-50%, -50%)
+      scale(0)
     `;
 
-    /*
-    ========================================================
-    APPEND
-    ========================================================
-    */
-
-    this.container.appendChild(img);
-
-    /*
-    ========================================================
-    CLEANUP
-    ========================================================
-    */
-
-    img.addEventListener('animationend', () => {
-      img.remove();
-    });
-  }
+  }, this.duration * 0.45);
 
   /*
-  ==========================================================
-  UTILS
-  ==========================================================
+  ========================================
+  REMOVE
+  ========================================
   */
 
-  random(min, max) {
-    return Math.random() * (max - min) + min;
+  setTimeout(() => {
+
+    img.remove();
+
+  }, this.duration);
+
+  /*
+  ========================================
+  NEXT IMAGE
+  ========================================
+  */
+
+  this.current++;
+
+  if (this.current >= this.images.length) {
+    this.current = 0;
   }
-
-  shuffle(array) {
-
-    for (let i = array.length - 1; i > 0; i--) {
-
-      const j = Math.floor(Math.random() * (i + 1));
-
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-
-    return array;
-  }
+}
 }

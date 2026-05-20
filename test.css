@@ -10,9 +10,9 @@
 
 body {
   overflow: hidden;
-  background: #0f0f0f;
+  background: #ffffff;
   font-family: Arial, sans-serif;
-  color: white;
+  color: rgb(255, 0, 0);
 }
 
 /* ========================================= */
